@@ -219,6 +219,9 @@ protected:
 
 
 
+
+
+
        /** Register a callback on state change of the socket
          *  @param handle       Socket handle
          *  @param callback     Function to call on state change
@@ -226,6 +229,9 @@ protected:
          *  @note Callback may be called in an interrupt context.
          */
     virtual void socket_attach(void *handle, void (*callback)(void *), void *data);
+
+
+
 
 
 
@@ -265,8 +271,9 @@ private:
             void *data;
     } _cbs[NUMSOCKETS]; /* Callbacks for socket_attach */  //_cbs[NUMSOCKETS];
 
+
     void (*_callback)(void *); void *_data;
-    void _run();
+    void *_handle;
     void socket_check();
     void event();
 };

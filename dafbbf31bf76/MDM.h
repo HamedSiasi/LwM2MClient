@@ -648,7 +648,7 @@ public:
     */
     int waitFinalResp(_CALLBACKPTR cb = NULL, 
                       void* param = NULL, 
-                      int timeout_ms = 10000);
+                      int timeout_ms = 15000);
 
     /** template version of #waitFinalResp when using callbacks, 
         This template will allow the compiler to do type cheking but 
@@ -659,7 +659,7 @@ public:
     template<class T>
     inline int waitFinalResp(int (*cb)(int type, const char* buf, int len, T* param), 
                     T* param, 
-                    int timeout_ms = 10000) 
+                    int timeout_ms = 15000)
     {
         return waitFinalResp((_CALLBACKPTR)cb, (void*)param, timeout_ms);
     }
@@ -766,7 +766,7 @@ protected:
     typedef struct { int handle; int timeout_ms; volatile bool connected; volatile int pending; } SockCtrl;
     // LISA-C has 6 TCP and 6 UDP sockets 
     // LISA-U and SARA-G have 7 sockets
-    SockCtrl _sockets[12];
+    SockCtrl _sockets[1]; //12
     int _findSocket(int handle = SOCKET_ERROR/* = CREATE*/);
     // management structure for HTTP profiles
     // it's possible to have up to 4 different HTTP profiles (LISA-C200, LISA-U200 and SARA-G350) having:

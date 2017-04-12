@@ -288,8 +288,6 @@ nsapi_size_or_error_t CellInterface::socket_sendto(nsapi_socket_t handle, const 
  */
 nsapi_size_or_error_t CellInterface::socket_recvfrom(nsapi_socket_t handle, SocketAddress *addr, void *data, unsigned size)
 {
-	printf("CellInterface:: socket_recvfrom ---------------------------- \r\n");
-
 	struct c027_socket *socket = (struct c027_socket *)handle;
 	if (!_mdm->socketReadable(socket->socket)) {
 		return NSAPI_ERROR_WOULD_BLOCK;
@@ -319,33 +317,31 @@ void CellInterface::socket_check()
 	printf(" ************************** socket_check *************************\r\n");
     while(running)
     {
-        for (int i = 0; i < NUMSOCKETS; i++)
-        {
+        //for (int i = 0; i < NUMSOCKETS; i++)
+        //{
             m.lock();
-            int readable = _mdm->socketReadable(i);
+            int readable = _mdm->socketReadable(0);
             m.unlock();
 
             if (readable != -1 && readable != 0)
             {
                 event();
             }
-        }
-        wait(0.25f);
+        //}
+        wait(1);
     }
-    running = false;
+    running = false;// do not change it
 }
 
 void CellInterface::event()
 {
 	//printf(" ************************** event *************************\r\n");
-    //for (int i = 0; i < NUMSOCKETS; i++)
-    //{
-    	//printf("%d  \r\n",i);
-        if (_cbs[0].callback)
-        {
-        	printf("CALL  \r\n");
+    //for (int i = 0; i < NUMSOCKETS; i++){
+    	//printf("i=%d \r\n", i);
+        //if (_cbs[i].callback) {
+        	//printf("call i=%d \r\n", i);
             _cbs[0].callback(_cbs[0].data);
-        }
+        //}
     //}
 }
 
@@ -382,7 +378,7 @@ void CellInterface::socket_attach(void *handle, void (*callback)(void *), void *
 {
     struct c027_socket *socket = (struct c027_socket *)handle;
 
-    printf("***** socket_attach ***** ip(%d) port(%d) proto(%d) socket(%d) *****\r\n", socket->ip, socket->port, socket->proto, socket->socket);
+    //printf("***** socket_attach ***** ip(%d) port(%d) proto(%d) socket(%d) *****\r\n", socket->ip, socket->port, socket->proto, socket->socket);
 
     _cbs[socket->socket].callback = callback;
     _cbs[socket->socket].data = data;
