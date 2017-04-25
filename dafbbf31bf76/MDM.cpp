@@ -344,64 +344,64 @@ bool MDMParser::init(const char* simpin, DevStatus* status, PinName pn)
 startPoint:
     INFO("Modem::init\r\n");
 
-//    sendFormated("AT\r\n");
-//    waitFinalResp();
-//    wait_ms(1000);
-//
-//    sendFormated("AT\r\n");
-//    waitFinalResp();
-//    wait_ms(1000);
-//
-//    sendFormated("AT+NBAND?\r\n");
-//    waitFinalResp();
-//    wait_ms(1000);
-//
-//    sendFormated("AT+CMEE=1\r\n");
-//    waitFinalResp();
-//    wait_ms(1000);
-//
-//    INFO("Modem::Manufacturing revision \r\n");
-//    sendFormated("AT+CGMR\r\n");
-//    waitFinalResp();
-//    wait_ms(1000);
-//
-//    INFO("Modem::Radio functionality \r\n");
-//    sendFormated("AT+CFUN?\r\n");
-//    waitFinalResp();
-//    wait_ms(1000);
-//
-//    //sendFormated("AT+COPS=1,2,\"23591\"\r\n");     // NEWBURY
-//    sendFormated("AT+COPS=1,2,\"46001\"\r\n");   // NEUL
-//    waitFinalResp();
-//    wait_ms(5000);
-//
-//
-//    unsigned int loopcounter = 0;
-//    while(true)
-//    {
-//    	loopcounter++;
-//    	INFO("Modem::Register status (%d) \r\n", (int)loopcounter );
-//    	sendFormated("AT+CEREG?\r\n");
-//    	waitFinalResp();
-//    	wait_ms(1000);
-//    	if (REG_OK(_net.csd) || REG_OK(_net.psd) || REG_OK(_net.eps))
-//    	{
-//    		break;
-//    	}
-//    }
-//
-//
-//    bool ok = false;
-//    INFO("Modem:: address \r\n");
-//    sendFormated("AT+CGPADDR\r\n");
-//    waitFinalResp(_cbCGPAddr, &ok);
-//    if (!ok)
-//    {
-//    	INFO("Modem:: IP address ERROR !!!\r\n");
-//    	INFO("retry in 5s ...\r\n");
-//    	wait_ms(5000);
-//    	goto startPoint;
-//    }
+    sendFormated("AT\r\n");
+    waitFinalResp();
+    wait_ms(1000);
+
+    sendFormated("AT\r\n");
+    waitFinalResp();
+    wait_ms(1000);
+
+    sendFormated("AT+NBAND?\r\n");
+    waitFinalResp();
+    wait_ms(1000);
+
+    sendFormated("AT+CMEE=1\r\n");
+    waitFinalResp();
+    wait_ms(1000);
+
+    INFO("Modem::Manufacturing revision \r\n");
+    sendFormated("AT+CGMR\r\n");
+    waitFinalResp();
+    wait_ms(1000);
+
+    INFO("Modem::Radio functionality \r\n");
+    sendFormated("AT+CFUN?\r\n");
+    waitFinalResp();
+    wait_ms(1000);
+
+    //sendFormated("AT+COPS=1,2,\"23591\"\r\n");     // NEWBURY
+    sendFormated("AT+COPS=1,2,\"46001\"\r\n");   // NEUL
+    waitFinalResp();
+    wait_ms(10000);
+
+
+    unsigned int loopcounter = 0;
+    while(true)
+    {
+    	loopcounter++;
+    	INFO("Modem::Register status (%d) \r\n", (int)loopcounter );
+    	sendFormated("AT+CEREG?\r\n");
+    	waitFinalResp();
+    	wait_ms(1000);
+    	if (REG_OK(_net.csd) || REG_OK(_net.psd) || REG_OK(_net.eps))
+    	{
+    		break;
+    	}
+    }
+
+
+    bool ok = false;
+    INFO("Modem:: address \r\n");
+    sendFormated("AT+CGPADDR\r\n");
+    waitFinalResp(_cbCGPAddr, &ok);
+    if (!ok)
+    {
+    	INFO("Modem:: IP address ERROR !!!\r\n");
+    	INFO("retry in 5s ...\r\n");
+    	wait_ms(5000);
+    	goto startPoint;
+    }
 
     if (status)
         memcpy(status, &_dev, sizeof(DevStatus));
@@ -994,9 +994,9 @@ int MDMParser::socketSend(int socket, const char * buf, int len)
 
 
 
-void MDMParser::tohex(unsigned char *in, size_t insz ,char *out, size_t outsz)
+void MDMParser::tohex(const char *in, size_t insz ,char *out, size_t outsz)
 {
-    unsigned char * pin = in;
+    const char * pin = in;
     const char * hex = "0123456789ABCDEF";
     char * pout = out;
 	for(; pin < in+insz; pin++)
@@ -1011,23 +1011,23 @@ void MDMParser::tohex(unsigned char *in, size_t insz ,char *out, size_t outsz)
 
 
 
-void MDMParser::hexto(unsigned char *in, size_t insz, char *out, size_t outsz)
+void MDMParser::hexto(const char *in, size_t insz, char *out, size_t outsz)
 {
-    const char* const hex = "0123456789ABCDEF";
     size_t len = insz;
-    int k = 0;
-    for (size_t i = 0; i < len; i+=2)
+    int i, k = 0;
+    for(i = 0; i < len; i+=2)
     {
         out[k++] = (((in[i] >= 'A')? (in[i] - 'A' + 10): (in[i] - '0')) << 4) | (((in[i+1] >= 'A')? (in[i+1] - 'A' + 10): (in[i+1] - '0')));
+        printf("%c%c -> out[%d]=%c \n", in[i],in[i+1],k-1,out[k-1]);
     }
-    out[k] = '\0'; // fixme
+    out[k] = '\0';
 }
 
 
-int MDMParser::socketSendTo(int socket, IP ip, int port, const char * buf, int len)
+int MDMParser::socketSendTo(int socket, IP ip, int port, const char * buff, int lenn)
 {
-	//const char * buf = "HAMED12345SIASI";
-	//int len = 15;
+	const char * buf = "HAMED12345SIASI";
+	int len = 15;
 
     int cnt = len;
     while (cnt > 0)
@@ -1040,7 +1040,7 @@ int MDMParser::socketSendTo(int socket, IP ip, int port, const char * buf, int l
         LOCK();
 
         char *hexstr = (char*)malloc(2*len);
-        tohex( (unsigned char *)buf, (size_t)len, (char*)hexstr, 2*len);
+        tohex( buf, len, hexstr, (2*len) );
 
         TRACE("<---- (%d) \"%*s\"  %c\r\n",    len,   len, buf, SHIFTIN);
         TRACE("<---- (%d) \"%*s\"  %c\r\n",  2*len, 2*len, hexstr, SHIFTIN);
@@ -1154,17 +1154,17 @@ int MDMParser::_cbUSORF(int type, const char* buf, int len, USORFparam* param)
 	sscanf(buf, "\r\n%d,%d.%d.%d.%d,%d,%d,%[^,],%d", &sk,&a,&b,&c,&d,&p,&sz, hexString, &x);
 
 
-	printf("\r\n socket:%d \r\n ip:%d.%d.%d.%d \r\n port:%d \r\n size:%d   %c\r\n hexString:%s \r\n", sk,a,b,c,d,p,sz, hexString, SHIFTIN);
+	printf("\r\nsocket:%d\r\nip:%d.%d.%d.%d\r\nport:%d\r\nsize:%d\r\nhexString:%s%c\r\n", sk,a,b,c,d,p,sz, hexString, SHIFTIN);
 	printf("MDM _cbUSORF hexString: %d \"%.*s\"   %c\r\n", 2*sz, 2*sz, hexString, SHIFTIN);
-	char *charString = (char*)malloc(sz);
-	hexto (  (unsigned char *)hexString, 2*sz, charString, sz);
+
+	char *charString = (char*)malloc(sz+1);
+	hexto(hexString, (2*sz), charString, sz);
+
 	printf("MDM _cbUSORF charString: %d \"%.*s\"    %c\r\n\n", sz , 2*sz , charString, SHIFTIN);
 
-
-
-
-	memcpy(param->buf, charString, sz ); //attention maybe "sz+1" -----------------------------------------------------------
+	memcpy(param->buf, charString, sz+1 ); //attention maybe "sz+1" -----------------------------------------------------------
 	free(charString);
+
 	param->ip   = IPADR(a,b,c,d);
 	param->port = p;
 	return WAIT;
