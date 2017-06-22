@@ -244,11 +244,11 @@ int MDMParser::waitFinalResp(_CALLBACKPTR cb     /* = NULL    optional callback 
             	/*We have a callback*/
                 int len = LENGTH(ret);
                 int ret = cb(type, buf, len, param);
-                printf("point 11 ret=%d \r\n", ret);
                 if (WAIT != ret){
-                	printf("no WAIT return ret=%d \r\n", ret);
+                	printf("no WAIT return ret = %d \r\n", ret);
                     return ret; 
                 }
+                return RESP_OK; // fixme
             }
 
 
@@ -371,10 +371,9 @@ startPoint:
     wait_ms(1000);
 
     //sendFormated("AT+COPS=1,2,\"23591\"\r\n");     // NEWBURY
-    sendFormated("AT+COPS=1,2,\"46001\"\r\n");   // NEUL
+    sendFormated("AT+COPS=1,2,\"46001\"\r\n");       // NEUL
     waitFinalResp();
     wait_ms(10000);
-
 
     unsigned int loopcounter = 0;
     while(true)
@@ -390,7 +389,6 @@ startPoint:
     	}
     }
 
-
     bool ok = false;
     INFO("Modem:: address \r\n");
     sendFormated("AT+CGPADDR\r\n");
@@ -402,7 +400,6 @@ startPoint:
     	wait_ms(5000);
     	goto startPoint;
     }
-
     if (status)
         memcpy(status, &_dev, sizeof(DevStatus));
     UNLOCK();
@@ -841,15 +838,13 @@ int MDMParser::_cbUSOCR(int type, const char* buf, int len, int* handle)
     return WAIT;
 }
 
-
-
 int MDMParser::socketSocket(IpProtocol ipproto, int port)
 {
 	int socket;
     LOCK();
 
     socket = _findSocket();
-    TRACE("MDM socketSocket (socket:%d port:%d)  %c\r\n", socket, port, SHIFTIN);
+    //TRACE("MDM socketSocket (socket:%d port:%d)  %c\r\n", socket, port, SHIFTIN);
     wait_ms(7000);
 
     if (socket != SOCKET_ERROR)
@@ -874,8 +869,6 @@ int MDMParser::socketSocket(IpProtocol ipproto, int port)
     return socket;
 }
 
-
-
 bool MDMParser::socketConnect(int socket, const char * host, int port)
 {
 	TRACE("MDM socketConnect (socket:%d port:%d) \r\n", socket, port);
@@ -899,7 +892,6 @@ bool MDMParser::socketConnect(int socket, const char * host, int port)
     return ok;
 }
 
-
 bool MDMParser::socketIsConnected(int socket)
 {
     bool ok = false;
@@ -909,7 +901,6 @@ bool MDMParser::socketIsConnected(int socket)
     UNLOCK();
     return ok;
 }
-
 
 bool MDMParser::socketSetBlocking(int socket, int timeout_ms)
 {
@@ -923,7 +914,6 @@ bool MDMParser::socketSetBlocking(int socket, int timeout_ms)
     UNLOCK();
     return ok;
 }
-
 
 bool  MDMParser::socketClose(int socket)
 {
@@ -1011,23 +1001,24 @@ void MDMParser::tohex(const char *in, size_t insz ,char *out, size_t outsz)
 
 
 
-void MDMParser::hexto(const char *in, size_t insz, char *out, size_t outsz)
+void MDMParser::hexto(char *in, size_t insz, char *out, size_t outsz)
 {
     size_t len = insz;
     int i, k = 0;
+
     for(i = 0; i < len; i+=2)
     {
         out[k++] = (((in[i] >= 'A')? (in[i] - 'A' + 10): (in[i] - '0')) << 4) | (((in[i+1] >= 'A')? (in[i+1] - 'A' + 10): (in[i+1] - '0')));
-        printf("%c%c -> out[%d]=%c \n", in[i],in[i+1],k-1,out[k-1]);
+        printf(" in[%d]in[%d] = %c%c ---> out[%d] = %c \r\n", i, i+1, in[i], in[i+1], k-1, out[k-1]);
     }
     out[k] = '\0';
 }
 
 
-int MDMParser::socketSendTo(int socket, IP ip, int port, const char * buff, int lenn)
+int MDMParser::socketSendTo(int socket, IP ip, int port, const char * buf, int len)
 {
-	const char * buf = "HAMED12345SIASI";
-	int len = 15;
+	//const char * buf = "HAMED12345SIASI";
+	//int len = 15;
 
     int cnt = len;
     while (cnt > 0)
@@ -1076,7 +1067,7 @@ int MDMParser::socketReadable(int socket)
         }
     }
     UNLOCK();
-    printf("socketReadable socket:%d pending:%d  %c\r\n", socket, pending, SHIFTIN);
+    printf("SOCKET(%d) PENDING(%d) %c\r\n", socket, pending, SHIFTIN);
     return pending;
 }
 
@@ -1149,21 +1140,34 @@ int MDMParser::_cbUSORF(int type, const char* buf, int len, USORFparam* param)
 	int sz, sk, p, a,b,c,d, x;
 	sscanf(buf, "\r\n%d,%d.%d.%d.%d,%d,%d", &sk,&a,&b,&c,&d,&p,&sz);
 
-	char *hexString;
-	hexString = (char*)malloc(sz);
+	char *hexString = NULL;
+	hexString = (char*)malloc(2*sz);// do not change the size
 	sscanf(buf, "\r\n%d,%d.%d.%d.%d,%d,%d,%[^,],%d", &sk,&a,&b,&c,&d,&p,&sz, hexString, &x);
 
 
 	printf("\r\nsocket:%d\r\nip:%d.%d.%d.%d\r\nport:%d\r\nsize:%d\r\nhexString:%s%c\r\n", sk,a,b,c,d,p,sz, hexString, SHIFTIN);
 	printf("MDM _cbUSORF hexString: %d \"%.*s\"   %c\r\n", 2*sz, 2*sz, hexString, SHIFTIN);
 
-	char *charString = (char*)malloc(sz+1);
-	hexto(hexString, (2*sz), charString, sz);
+	char *charString = NULL;
+	charString = (char*)malloc(sz+1);
+	//hexto(hexString, (2*sz), charString, sz+1);
 
+	int i, k = 0;
+	size_t mylen = 2*sz;
+	for(i = 0; i < mylen; i+=2)
+	    {
+			charString[k++] = (((hexString[i] >= 'A')? (hexString[i] - 'A' + 10): (hexString[i] - '0')) << 4) | (((hexString[i+1] >= 'A')? (hexString[i+1] - 'A' + 10): (hexString[i+1] - '0')));
+	        printf("hexString[%d][%d] = %c%c ---> charString[%d] = %c \r\n", i, i+1, hexString[i], hexString[i+1], k-1, charString[k-1]);
+	    }
+	charString[k] = '\0';
 	printf("MDM _cbUSORF charString: %d \"%.*s\"    %c\r\n\n", sz , 2*sz , charString, SHIFTIN);
 
-	memcpy(param->buf, charString, sz+1 ); //attention maybe "sz+1" -----------------------------------------------------------
+
+
+
+	memcpy(param->buf, charString, sz ); //attention maybe "sz+1" -----------------------------------------------------------
 	free(charString);
+	free(hexString);
 
 	param->ip   = IPADR(a,b,c,d);
 	param->port = p;

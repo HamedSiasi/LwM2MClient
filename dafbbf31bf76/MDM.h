@@ -737,7 +737,7 @@ protected:
     static int _cbUSORD(int type,  const char* buf, int len, char* out);
     static int _cbCGPAddr(int type,const char* buf, int len, bool* connected); // Rob
     static void tohex(const char *in, size_t insz, char *out, size_t outsz); //hamed
-    static void hexto(const char *in, size_t insz, char *out, size_t outsz); //hamed
+    static void hexto(char *in, size_t insz, char *out, size_t outsz); //hamed
 
 
 

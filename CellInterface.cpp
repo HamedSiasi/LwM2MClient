@@ -89,7 +89,7 @@ nsapi_error_t CellInterface::connect(
 nsapi_error_t CellInterface::connect()
 {
 	_debug = true;
-	printf("CellInterface:: connect \r\n");
+	//printf("CellInterface:: connect \r\n");
 	gModulePowerOn = 1;
 	gSaraResetBar = 1;
 
@@ -108,7 +108,7 @@ nsapi_error_t CellInterface::connect()
 
 int CellInterface::disconnect()
 {
-	printf("CellInterface:: disconnect\r\n");
+	//printf("CellInterface:: disconnect\r\n");
     if (!_mdm->disconnect()) {
         return NSAPI_ERROR_DEVICE_ERROR;
     }
@@ -117,13 +117,13 @@ int CellInterface::disconnect()
 
 const char *CellInterface::get_ip_address()
 {
-	printf("CellInterface:: get_ip_address: %s \r\n", _ip_address.get_ip_address() );
+	//printf("CellInterface:: get_ip_address: %s \r\n", _ip_address.get_ip_address() );
 	return _ip_address.get_ip_address();
 }
 
 const char *CellInterface::get_mac_address()
 {
-	printf("CellInterface:: get_mac_address\r\n");
+	//printf("CellInterface:: get_mac_address\r\n");
     return 0;
 }
 
@@ -143,7 +143,7 @@ struct c027_socket {
 
 int CellInterface::socket_open(nsapi_socket_t *handle, nsapi_protocol_t proto)
 {
-	printf("CellInterface:: socket_open\r\n");
+	//printf("CellInterface:: socket_open\r\n");
 	int fd = _mdm->socketSocket(MDMParser::IPPROTO_UDP, (int)PORT);
 	if (fd < 0) {
 		return NSAPI_ERROR_NO_SOCKET;
@@ -162,7 +162,7 @@ int CellInterface::socket_open(nsapi_socket_t *handle, nsapi_protocol_t proto)
 
 int CellInterface::socket_close(nsapi_socket_t handle)
 {
-	printf("CellInterface:: socket_close\r\n");
+	//printf("CellInterface:: socket_close\r\n");
     struct c027_socket *socket = (struct c027_socket *)handle;
     _mdm->socketFree(socket->socket);
     delete socket;
@@ -172,21 +172,21 @@ int CellInterface::socket_close(nsapi_socket_t handle)
 
 int CellInterface::socket_bind(nsapi_socket_t handle, const SocketAddress &address)
 {
-	printf("CellInterface:: socket_bind\r\n");
+	//printf("CellInterface:: socket_bind\r\n");
 	return NSAPI_ERROR_UNSUPPORTED;
 }
 
 
 int CellInterface::socket_listen(nsapi_socket_t handle, int backlog)
 {
-	printf("CellInterface:: socket_listen\r\n");
+	//printf("CellInterface:: socket_listen\r\n");
 	return NSAPI_ERROR_UNSUPPORTED;
 }
 
 
 int CellInterface::socket_connect(nsapi_socket_t handle, const SocketAddress &addr)
 {
-	printf("CellInterface:: socket_connect\r\n");
+	//printf("CellInterface:: socket_connect\r\n");
     struct c027_socket *socket = (struct c027_socket *)handle;
     if (!_mdm->socketConnect(socket->socket, addr.get_ip_address(), addr.get_port())) {
         return NSAPI_ERROR_DEVICE_ERROR;
@@ -197,14 +197,14 @@ int CellInterface::socket_connect(nsapi_socket_t handle, const SocketAddress &ad
 
 nsapi_error_t CellInterface::socket_accept(nsapi_socket_t server,  nsapi_socket_t *handle, SocketAddress *address)
 {
-	printf("CellInterface:: socket_accept\r\n");
+	//printf("CellInterface:: socket_accept\r\n");
 	return NSAPI_ERROR_UNSUPPORTED;
 }
 
 
 int CellInterface::socket_send(nsapi_socket_t handle, const void *data, unsigned size)
 {
-	printf("CellInterface:: socket_send\r\n");
+	//printf("CellInterface:: socket_send\r\n");
 	struct c027_socket *socket = (struct c027_socket *)handle;
 	int sent = _mdm->socketSend(socket->socket, (const char *)data, size);
 	if (sent == SOCKET_ERROR) {
@@ -216,7 +216,7 @@ int CellInterface::socket_send(nsapi_socket_t handle, const void *data, unsigned
 
 int CellInterface::socket_recv(nsapi_socket_t handle, void *data, unsigned size)
 {
-	printf("CellInterface:: socket_recv\r\n");
+	//printf("CellInterface:: socket_recv\r\n");
 	struct c027_socket *socket = (struct c027_socket *)handle;
 	if (!_mdm->socketReadable(socket->socket)) {
         return NSAPI_ERROR_WOULD_BLOCK;
@@ -250,10 +250,8 @@ int CellInterface::socket_recv(nsapi_socket_t handle, void *data, unsigned size)
 */
 nsapi_size_or_error_t CellInterface::socket_sendto(nsapi_socket_t handle, const SocketAddress &addr, const void *data, unsigned size)
 {
-	printf("CellInterface:: socket_sendto ----------------------------- size:%d \r\n", size);
-
+	//printf("CellInterface:: socket_sendto ----------------------------- size:%d \r\n", size);
     struct c027_socket *socket = (struct c027_socket *)handle;
-
     int sent = _mdm->socketSendTo(
     		socket->socket,
     		*(MDMParser::IP *)addr.get_ip_bytes(),
@@ -314,7 +312,7 @@ nsapi_size_or_error_t CellInterface::socket_recvfrom(nsapi_socket_t handle, Sock
  */
 void CellInterface::socket_check()
 {
-	printf(" ************************** socket_check *************************\r\n");
+	//printf(" ************************** socket_check *************************\r\n");
     while(running)
     {
         //for (int i = 0; i < NUMSOCKETS; i++)
